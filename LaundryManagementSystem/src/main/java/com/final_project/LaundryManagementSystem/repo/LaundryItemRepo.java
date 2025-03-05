@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LaundryItemRepo extends JpaRepository<LaundryItem, String> {
+public interface LaundryItemRepo extends JpaRepository<LaundryItem, Long> {
 }

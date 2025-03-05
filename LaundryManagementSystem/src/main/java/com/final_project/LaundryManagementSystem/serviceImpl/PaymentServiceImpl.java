@@ -1,6 +1,8 @@
 package com.final_project.LaundryManagementSystem.serviceImpl;
 
 import com.final_project.LaundryManagementSystem.customExceptions.OrderNotFoundException;
+import com.final_project.LaundryManagementSystem.customExceptions.PaymentUnsuccessfulException;
+import com.final_project.LaundryManagementSystem.customExceptions.SlotsNotAvailableException;
 import com.final_project.LaundryManagementSystem.dto.PaymentResult;
 import com.final_project.LaundryManagementSystem.enums.PaymentMethod;
 import com.final_project.LaundryManagementSystem.model.LaundryOrder;
@@ -16,8 +18,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final LaundryOrderRepo orderRepo;
     @Override
-    @Transactional
-    public PaymentResult processPayment(String orderId, PaymentMethod paymentMethod, String paymentDetails) throws OrderNotFoundException {
+    @Transactional(rollbackOn = {PaymentUnsuccessfulException.class , SlotsNotAvailableException.class})
+    public PaymentResult processPayment(Long orderId, PaymentMethod paymentMethod, String paymentDetails) throws OrderNotFoundException {
         LaundryOrder order = orderRepo.findById(orderId).orElseThrow(
                 () -> new OrderNotFoundException("Order with id: "+ orderId+" does not exists"));
         boolean paymentResult = processPaymentWithGateway(order.getTotalPrice(),paymentMethod,paymentDetails);

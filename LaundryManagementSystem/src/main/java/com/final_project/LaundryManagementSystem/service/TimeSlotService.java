@@ -9,8 +9,9 @@ import java.time.LocalTime;
 import java.util.List;
 
 public interface TimeSlotService {
-    public List<TimeSlot> getAvailableSlots(LocalDate day, SlotType type);
+    public List<TimeSlot> getAvailableSlots(String day, String type);
     public boolean reserveSlot(TimeSlot slot, LaundryOrder order, SlotType type);
     public void generateSlotsForUpcomingPeriod();
 
+    void saveTimeSlot(TimeSlot pickupSlot);
 }

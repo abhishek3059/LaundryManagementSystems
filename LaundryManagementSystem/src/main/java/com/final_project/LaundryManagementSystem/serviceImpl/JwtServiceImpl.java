@@ -1,12 +1,16 @@
 package com.final_project.LaundryManagementSystem.serviceImpl;
 
 import com.final_project.LaundryManagementSystem.service.JwtService;
+import com.final_project.LaundryManagementSystem.service.SecurityService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +19,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Service
+@Data
 public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret.key}")
     private String secretKey;
     @Value("${jwt.token.expiration}")
     private long expirationTime;
+    private final ApplicationContext applicationContext;
     @Override
     public String generateToken(String username) {
         Map<String,Object> claims = new HashMap<>();
-            return Jwts.builder()
+        SecurityService service = applicationContext.getBean(SecurityService.class);
+        UserDetails userDetails = service.loadUserByUsername(username);
+        claims.put("roles",userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet()));
+
+        return Jwts.builder()
                     .claims().add(claims)
                     .subject(username)
                     .issuedAt(new Date(System.currentTimeMillis()))

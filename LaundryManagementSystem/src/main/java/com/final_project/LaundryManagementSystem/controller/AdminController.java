@@ -7,13 +7,9 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @Data
 @RequestMapping("api")
 public class AdminController {
@@ -28,5 +24,16 @@ public class AdminController {
         if(result){
             return ResponseEntity.ok().build();
         } else return ResponseEntity.badRequest().build();
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PreAuthorize("(hasAnyRole('ADMIN','STAFF')")
+    @PostMapping("/staff/create-staff")
+    public ResponseEntity<?> addStaffUser(@RequestBody UserRegistrationRequest request)
+            throws  UserAlreadyExistsException{
+        boolean result = service.registerAsStaff(request);
+        if(result){
+            return ResponseEntity.ok().build();
+        }else return ResponseEntity.badRequest().build();
     }
 }

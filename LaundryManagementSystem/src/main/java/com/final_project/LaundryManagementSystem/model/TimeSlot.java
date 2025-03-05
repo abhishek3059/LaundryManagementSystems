@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,13 +29,13 @@ public class TimeSlot {
 
     private SlotType type;
 
-    private Integer capacity;
+    private Integer capacity = 1;
 
     @OneToMany(mappedBy = "pickupSlot")
-    private List<LaundryOrder> pickupOrders;
+    private List<LaundryOrder> pickupOrders = new ArrayList<>();
 
     @OneToMany(mappedBy = "deliverySlot")
-    private List<LaundryOrder> deliveryOrders;
+    private List<LaundryOrder> deliveryOrders = new ArrayList<>();
 
     public boolean isAvailable(){
         if(type == SlotType.PICKUP){

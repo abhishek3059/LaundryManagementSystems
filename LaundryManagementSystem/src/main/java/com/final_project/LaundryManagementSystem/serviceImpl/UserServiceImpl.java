@@ -1,5 +1,4 @@
 package com.final_project.LaundryManagementSystem.serviceImpl;
-
 import com.final_project.LaundryManagementSystem.customExceptions.UnauthorizedAccessException;
 import com.final_project.LaundryManagementSystem.customExceptions.UserAlreadyExistsException;
 import com.final_project.LaundryManagementSystem.dto.UserLoginRequest;
@@ -17,19 +16,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.zip.DataFormatException;
+
 
 @Data
 @Service
 public class UserServiceImpl implements UserService {
+
 
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder encoder;
@@ -114,16 +111,20 @@ public class UserServiceImpl implements UserService {
         if (!request.getRoles().contains("ROLE_ADMIN")) {
             throw new IllegalArgumentException("Admin users must have the ROLE_ADMIN role.");
         }
-
+        Set<UserRoles> roles = new HashSet<>();
+        roles.add(UserRoles.ROLE_USER); //default
         // Build the User object
+
         User user = User.builder()
                 .username(request.getUsername())
                 .password(encoder.encode(request.getPassword())) // Encode the password
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
-                .roles(new HashSet<>())
+                .dateOfBirth(LocalDate.parse(request.getDateOfBirth(),DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                .roles(roles)
                 .build();
+
 
         // Add roles from the request
         for (String role : request.getRoles()) {
@@ -134,4 +135,45 @@ public class UserServiceImpl implements UserService {
         userRepo.save(user);
         return true;
     }
+    @Override
+    public boolean registerAsStaff(UserRegistrationRequest request)
+            throws UserAlreadyExistsException{
+
+        if(userRepo.existsByUsername(request.getUsername())){
+            throw new UserAlreadyExistsException("User with username " + request.getUsername() + " already exists");
+        }
+        if(request.getRoles() == null || request.getRoles().isEmpty()){
+            throw new IllegalArgumentException("Roles cannot be empty");
+        }
+        if(!request.getRoles().contains("ROLE_STAFF")){
+            throw new IllegalArgumentException("To be registered as staff the role must contain STAFF role");
+        }
+
+        Set<UserRoles> roles = new HashSet<>();
+        roles.add(UserRoles.ROLE_USER); //default
+        // Build the User object
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(encoder.encode(request.getPassword())) // Encode the password
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .address(request.getAddress())
+                .dateOfBirth(LocalDate.parse(request.getDateOfBirth(),DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                .roles(roles)
+                .build();
+
+
+        // Add roles from the request
+        for (String role : request.getRoles()) {
+            user.getRoles().add(UserRoles.valueOf(role.startsWith("ROLE_") ? role.toUpperCase() : "ROLE_" + role.toUpperCase()));
+        }
+
+        // Save the user
+        userRepo.save(user);
+        return true;
+
+
+    }
+
 }

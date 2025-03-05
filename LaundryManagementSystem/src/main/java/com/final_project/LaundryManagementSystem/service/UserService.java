@@ -10,4 +10,5 @@ public interface UserService {
     String login(UserLoginRequest request);
     boolean validateToken(String token);
     boolean registerAsAdmin(UserRegistrationRequest request) throws UserAlreadyExistsException;
+    boolean registerAsStaff(UserRegistrationRequest request) throws UserAlreadyExistsException;
 }

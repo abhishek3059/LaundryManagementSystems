@@ -24,8 +24,9 @@ public class MyUserPrinciple implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-       return user.getRoles().stream().map(roles -> new SimpleGrantedAuthority(
-               "ROLE_"+ roles.name())).collect(Collectors.toList());
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.name())) // Use role.name() directly
+                .collect(Collectors.toList());
     }
 
     @Override

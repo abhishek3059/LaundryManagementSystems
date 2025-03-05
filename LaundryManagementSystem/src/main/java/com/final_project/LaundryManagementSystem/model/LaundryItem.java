@@ -1,5 +1,6 @@
 package com.final_project.LaundryManagementSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,17 +18,16 @@ public class LaundryItem {
     private Long itemId;
 
     @ManyToOne
+    @JsonIgnore // Prevents recursion with LaundryOrder
     private LaundryOrder order;
 
     @ManyToOne
+    @JsonIgnore // Prevents recursion with LaundryService
     private LaundryService service;
-
     private String itemDescription;
     private Integer quantity;
     private Double price;
-
     private String color;
     private String fabric;
     private String specialNotes;
-
 }

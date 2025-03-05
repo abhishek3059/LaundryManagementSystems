@@ -30,10 +30,14 @@ public class SecurityConfig {
             return http.csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("api/auth/login","api/auth/register","api/auth/validate/**","api/public/**").permitAll()
+                            .requestMatchers("api/admin/**").hasRole("ADMIN")
+                            .requestMatchers("api/staff/**","api/orders/**","api/service/save").hasAnyRole("ADMIN","STAFF")
+                            .requestMatchers("api/orders","api/reports/**","api/timeslots/**","api/service/get").hasAnyRole("USER","ADMIN","STAFF")
                             .anyRequest().authenticated())
                     .userDetailsService(service)
                             .httpBasic(Customizer.withDefaults())
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .sessionManagement(session ->
+                            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
 

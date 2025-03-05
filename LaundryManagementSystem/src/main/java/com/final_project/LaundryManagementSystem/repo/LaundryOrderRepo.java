@@ -12,9 +12,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface LaundryOrderRepo extends JpaRepository<LaundryOrder,String> {
+public interface LaundryOrderRepo extends JpaRepository<LaundryOrder,Long> {
     @Query(
-            "SELECT SUM(li.quantity) FROM LaundryOrder lo JOIN lo.items li " +
+            "SELECT COALESCE(SUM(li.quantity), 0) FROM LaundryOrder lo JOIN lo.items li " +
                     "WHERE lo.orderStatus = com.final_project.LaundryManagementSystem.enums.OrderStatus.PROCESSING AND " +
                     "CAST(lo.processingStartTime AS date) = :processingDate"
     )

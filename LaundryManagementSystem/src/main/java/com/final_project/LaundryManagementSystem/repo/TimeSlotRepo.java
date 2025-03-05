@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface TimeSlotRepo extends JpaRepository<TimeSlot,String> {
+public interface TimeSlotRepo extends JpaRepository<TimeSlot,Long> {
     List<TimeSlot> findByDateAndType(LocalDate date, SlotType type);
     boolean existsByDate(LocalDate date);
 
