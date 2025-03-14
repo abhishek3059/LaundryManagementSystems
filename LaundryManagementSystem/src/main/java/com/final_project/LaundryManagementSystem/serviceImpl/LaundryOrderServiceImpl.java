@@ -152,6 +152,10 @@ public class LaundryOrderServiceImpl implements LaundryOrderService {
         return LaundryItem.builder()
                 .service(LAUNDRY_SERVICE_REPO.findById(dto.getServiceId()).orElse(null))
                 .quantity(dto.getQuantity())
+                .itemDescription(dto.getItemDescription())
+                .color(dto.getColor())
+                .fabric(dto.getFabric())
+                .specialNotes(dto.getSpecialNotes())
                 .price(dto.getPrice())
                 .build();
     }

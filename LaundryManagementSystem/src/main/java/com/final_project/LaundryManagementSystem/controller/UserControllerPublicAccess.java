@@ -28,7 +28,7 @@ public class UserControllerPublicAccess {
         }
         else return ResponseEntity.badRequest().build();
     }
-    @GetMapping("/auth/login")
+    @PostMapping("/auth/login")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> login (@RequestBody UserLoginRequest request){
         return ResponseEntity.ok(service.login(request));
