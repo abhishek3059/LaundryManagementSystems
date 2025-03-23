@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.CredentialException;
 import java.util.List;
 
 @RestController
@@ -35,7 +36,7 @@ public class LaundryOrderController {
 
     @PreAuthorize("hasAnyRole('ADMIN','STAFF)")
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<LaundryOrderDTO> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status)
+    public ResponseEntity<LaundryOrderDTO> updateOrderStatus(@PathVariable Long orderId, @RequestParam("status") String status)
             throws OrderNotFoundException {
             LaundryOrderDTO order = laundryOrderService.updateOrderStatus(orderId,status);
 //          notificationService.sendOrderStatusUpdate(order);
@@ -47,7 +48,16 @@ public class LaundryOrderController {
         List<LaundryOrderDTO> orders = laundryOrderService.getOrderByStatus(orderStatus);
         return ResponseEntity.ok(orders);
     }
+    @GetMapping("/customer/{username}")
+    public ResponseEntity<List<LaundryOrderDTO>> getOrdersByCustomer(@PathVariable String username){
+        List<LaundryOrderDTO> orders = laundryOrderService.getOrdersByCustomer(username);
+        return ResponseEntity.ok(orders);
+    }
 
+    @GetMapping("get-orders")
+    public ResponseEntity<List<LaundryOrderDTO>> getOrders() throws CredentialException {
+       return ResponseEntity.ok(laundryOrderService.getAllOrders());
+    }
 
 
 

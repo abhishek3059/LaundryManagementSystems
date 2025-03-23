@@ -6,6 +6,7 @@ import com.final_project.LaundryManagementSystem.model.TimeSlot;
 import com.final_project.LaundryManagementSystem.model.User;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;

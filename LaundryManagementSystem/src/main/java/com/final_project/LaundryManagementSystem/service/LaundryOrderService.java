@@ -6,15 +6,14 @@ import com.final_project.LaundryManagementSystem.customExceptions.PaymentUnsucce
 import com.final_project.LaundryManagementSystem.customExceptions.SlotsNotAvailableException;
 import com.final_project.LaundryManagementSystem.dto.LaundryOrderDTO;
 import com.final_project.LaundryManagementSystem.dto.LaundryOrderRequest;
-import com.final_project.LaundryManagementSystem.model.User;
 
+import javax.security.auth.login.CredentialException;
 import java.util.List;
 
 public interface LaundryOrderService {
-    public LaundryOrderDTO createOrder(LaundryOrderRequest laundryOrderRequest) throws OrderNotFoundException, SlotsNotAvailableException, PaymentUnsuccessfulException, OrderCapacityReachedException;
-    public LaundryOrderDTO updateOrderStatus(Long orderId, String orderStatus) throws OrderNotFoundException;
-    public List<LaundryOrderDTO> getOrderByStatus(String status);
-    public List<LaundryOrderDTO> getOrdersByCustomer(User customer);
-
-
+     LaundryOrderDTO createOrder(LaundryOrderRequest laundryOrderRequest) throws OrderNotFoundException, SlotsNotAvailableException, PaymentUnsuccessfulException, OrderCapacityReachedException;
+     LaundryOrderDTO updateOrderStatus(Long orderId, String orderStatus) throws OrderNotFoundException;
+    List<LaundryOrderDTO> getOrderByStatus(String status);
+     List<LaundryOrderDTO> getOrdersByCustomer(String username);
+    List<LaundryOrderDTO> getAllOrders() throws CredentialException;
 }

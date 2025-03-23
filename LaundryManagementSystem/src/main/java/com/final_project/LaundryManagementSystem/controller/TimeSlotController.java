@@ -5,10 +5,7 @@ import com.final_project.LaundryManagementSystem.model.TimeSlot;
 import com.final_project.LaundryManagementSystem.service.TimeSlotService;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +21,15 @@ public class TimeSlotController {
         List<TimeSlot> slots = timeSlotService.getAvailableSlots(day, type);
         return ResponseEntity.ok(slots);
     }
-
+    @PostMapping("/get-slot")
+    public ResponseEntity<TimeSlot> getTimeSlot(@RequestParam("timeSlotId") long timeSlotId)
+    {
+        return ResponseEntity.ok(timeSlotService.findSlotById(timeSlotId));
+    }
+    @PostMapping("/generate")
+    public void generateTimeSlot(){
+        timeSlotService.generateSlotsForUpcomingPeriod();
+    }
 
 
 }

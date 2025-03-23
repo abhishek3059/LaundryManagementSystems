@@ -1,5 +1,7 @@
 package com.final_project.LaundryManagementSystem.serviceImpl;
 
+import com.final_project.LaundryManagementSystem.model.User;
+import com.final_project.LaundryManagementSystem.repo.UserRepo;
 import com.final_project.LaundryManagementSystem.service.JwtService;
 import com.final_project.LaundryManagementSystem.service.SecurityService;
 import io.jsonwebtoken.Claims;
@@ -29,11 +31,16 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.token.expiration}")
     private long expirationTime;
     private final ApplicationContext applicationContext;
+    private final UserRepo userRepo;
     @Override
     public String generateToken(String username) {
         Map<String,Object> claims = new HashMap<>();
         SecurityService service = applicationContext.getBean(SecurityService.class);
         UserDetails userDetails = service.loadUserByUsername(username);
+        claims.put("username",userDetails.getUsername());
+        User user = userRepo.findByUsername(username).orElseThrow(()->new BadCredentialsException("User not found"));
+        claims.put("userId",user.getId());
+        claims.put("user email" , user.getEmail());
         claims.put("roles",userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet()));

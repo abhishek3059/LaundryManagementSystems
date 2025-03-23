@@ -6,8 +6,10 @@ import com.final_project.LaundryManagementSystem.dto.UserLoginRequest;
 import com.final_project.LaundryManagementSystem.dto.UserRegistrationRequest;
 import com.final_project.LaundryManagementSystem.service.UserService;
 import lombok.Data;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,6 +43,13 @@ public class UserControllerPublicAccess {
             return ResponseEntity.ok().build();
         }
         else return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/auth/getCustomerId")
+    public ResponseEntity<Long> getCustomerId(@RequestParam String token){
+        Authentication auth = (Authentication) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        System.out.println(auth);
+        return null;
     }
 
 

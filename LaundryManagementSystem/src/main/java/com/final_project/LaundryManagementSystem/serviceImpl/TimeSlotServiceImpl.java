@@ -63,6 +63,11 @@
             timeSlotRepo.save(pickupSlot);
         }
 
+        @Override
+        public TimeSlot findSlotById(long timeSlotId) {
+            return timeSlotRepo.findById(timeSlotId).orElseThrow(()-> new RuntimeException("Given time slot cannot be fetched"));
+        }
+
         @Transactional
         private void createSlotForDate(LocalDate date) {
             if (timeSlotRepo.existsByDate(date)) {

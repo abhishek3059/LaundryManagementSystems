@@ -6,21 +6,25 @@ import com.final_project.LaundryManagementSystem.dto.LaundryOrderRequest;
 import com.final_project.LaundryManagementSystem.dto.PaymentResult;
 import com.final_project.LaundryManagementSystem.enums.OrderStatus;
 import com.final_project.LaundryManagementSystem.enums.SlotType;
+import com.final_project.LaundryManagementSystem.enums.UserRoles;
 import com.final_project.LaundryManagementSystem.model.*;
 import com.final_project.LaundryManagementSystem.repo.LaundryItemRepo;
 import com.final_project.LaundryManagementSystem.repo.LaundryOrderRepo;
 import com.final_project.LaundryManagementSystem.repo.LaundryServiceRepo;
 import com.final_project.LaundryManagementSystem.repo.UserRepo;
-import com.final_project.LaundryManagementSystem.service.LaundryCapacityService;
-import com.final_project.LaundryManagementSystem.service.LaundryOrderService;
-import com.final_project.LaundryManagementSystem.service.PaymentService;
-import com.final_project.LaundryManagementSystem.service.TimeSlotService;
+import com.final_project.LaundryManagementSystem.service.*;
 import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.CredentialException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -36,6 +40,8 @@ public class LaundryOrderServiceImpl implements LaundryOrderService {
     private final LaundryItemRepo laundryItemRepo;
     private final UserRepo USER_REPO;
     private final PaymentService paymentService;
+    private final ApplicationContext applicationContext;
+    private final LaundryOrderRepo laundryOrderRepo;
 
 
     @Override
@@ -65,10 +71,10 @@ public class LaundryOrderServiceImpl implements LaundryOrderService {
         TimeSlot deliverySlot = request.getDeliverySlot();
 
         if (pickupSlot.getSlotId() == null) {
-            TIME_SLOT_SERVICE.saveTimeSlot(pickupSlot); // Assuming you have a save method in TimeSlotService
+            TIME_SLOT_SERVICE.saveTimeSlot(pickupSlot); 
         }
         if (deliverySlot.getSlotId() == null) {
-            TIME_SLOT_SERVICE.saveTimeSlot(deliverySlot); // Assuming you have a save method in TimeSlotService
+            TIME_SLOT_SERVICE.saveTimeSlot(deliverySlot);
         }
 
         LaundryOrder order = LaundryOrder.builder()
@@ -92,8 +98,15 @@ public class LaundryOrderServiceImpl implements LaundryOrderService {
                 !TIME_SLOT_SERVICE.reserveSlot(request.getDeliverySlot(), order, SlotType.DELIVERY)) {
             throw new SlotsNotAvailableException("Requested slots are not available");
         }
+        ORDER_REPO.save(order);
+        pickupSlot = TIME_SLOT_SERVICE.findSlotById(pickupSlot.getSlotId());
+        deliverySlot = TIME_SLOT_SERVICE.findSlotById(deliverySlot.getSlotId());
+        pickupSlot.setCapacity(pickupSlot.getCapacity() - 1);
+        deliverySlot.setCapacity(deliverySlot.getCapacity() - 1);
+        TIME_SLOT_SERVICE.saveTimeSlot(pickupSlot);
+        TIME_SLOT_SERVICE.saveTimeSlot(deliverySlot);
 
-         ORDER_REPO.save(order);
+
 
         PaymentResult paymentResult = paymentService.processPayment(
                 order.getId(),
@@ -144,10 +157,27 @@ public class LaundryOrderServiceImpl implements LaundryOrderService {
     }
 
     @Override
-    public List<LaundryOrderDTO> getOrdersByCustomer(User customer) {
+    public List<LaundryOrderDTO> getOrdersByCustomer(String username) {
+        SecurityService service = applicationContext.getBean(SecurityService.class);
+        MyUserPrinciple principle = (MyUserPrinciple) service.loadUserByUsername(username);
+        User customer = principle.getUser();
         List<LaundryOrder> orders =  ORDER_REPO.findByCustomerOrderByOrderDateTimeDesc(customer);
         return orders.stream().map(this::convertLaundryIntoLaundryDto).toList();
     }
+
+    @Override
+    public List<LaundryOrderDTO> getAllOrders() throws CredentialException {
+
+        SecurityService service = applicationContext.getBean(SecurityService.class);
+        MyUserPrinciple principle =(MyUserPrinciple) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User customer = principle.getUser();
+        if(customer != null && (customer.getRoles().contains(UserRoles.ROLE_ADMIN) || customer.getRoles().contains(UserRoles.ROLE_STAFF))) {
+            List<LaundryOrder> orders = laundryOrderRepo.findAll();
+            return orders.stream().map(this::convertLaundryIntoLaundryDto).toList();
+        }
+        else throw new CredentialException("Access denied");
+    }
+
     private LaundryItem convertLaundryItemDTOtoEntity(LaundryItemRequest dto) {
         return LaundryItem.builder()
                 .service(LAUNDRY_SERVICE_REPO.findById(dto.getServiceId()).orElse(null))

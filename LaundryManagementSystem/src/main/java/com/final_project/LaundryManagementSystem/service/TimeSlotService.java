@@ -14,4 +14,6 @@ public interface TimeSlotService {
     public void generateSlotsForUpcomingPeriod();
 
     void saveTimeSlot(TimeSlot pickupSlot);
+
+    TimeSlot findSlotById(long timeSlotId);
 }
